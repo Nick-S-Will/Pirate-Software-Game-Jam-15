@@ -35,6 +35,15 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Manipulate"",
+                    ""type"": ""Button"",
+                    ""id"": ""2f81b82d-077b-4524-b707-f3945b9c433e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -86,6 +95,61 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""name"": ""right"",
                     ""id"": ""b6117746-6442-46f4-bd33-bc49a5706d01"",
                     ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Arrows"",
+                    ""id"": ""32f488ea-6bd9-4d4f-b895-1fcb58e44a49"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""b0a40801-58fc-4122-9da8-42da47afa4ab"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""3572b88d-b713-44c3-8415-a51ec86bb2a6"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""47b00213-6484-424c-811c-ea073ccea8f7"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""0f6366f9-4395-48f4-bdbe-39c7a2e44328"",
+                    ""path"": ""<Keyboard>/rightArrow"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -147,6 +211,28 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""13fe6e68-4e3c-4e34-8a2c-5919fcfecaab"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Manipulate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8b2faf8f-cc25-4f1e-b0fd-28fb13eaf402"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Manipulate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -156,6 +242,7 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
         // Shadow
         m_Shadow = asset.FindActionMap("Shadow", throwIfNotFound: true);
         m_Shadow_Move = m_Shadow.FindAction("Move", throwIfNotFound: true);
+        m_Shadow_Manipulate = m_Shadow.FindAction("Manipulate", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -218,11 +305,13 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Shadow;
     private List<IShadowActions> m_ShadowActionsCallbackInterfaces = new List<IShadowActions>();
     private readonly InputAction m_Shadow_Move;
+    private readonly InputAction m_Shadow_Manipulate;
     public struct ShadowActions
     {
         private @ShadowInputs m_Wrapper;
         public ShadowActions(@ShadowInputs wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Shadow_Move;
+        public InputAction @Manipulate => m_Wrapper.m_Shadow_Manipulate;
         public InputActionMap Get() { return m_Wrapper.m_Shadow; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -235,6 +324,9 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
+            @Manipulate.started += instance.OnManipulate;
+            @Manipulate.performed += instance.OnManipulate;
+            @Manipulate.canceled += instance.OnManipulate;
         }
 
         private void UnregisterCallbacks(IShadowActions instance)
@@ -242,6 +334,9 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
+            @Manipulate.started -= instance.OnManipulate;
+            @Manipulate.performed -= instance.OnManipulate;
+            @Manipulate.canceled -= instance.OnManipulate;
         }
 
         public void RemoveCallbacks(IShadowActions instance)
@@ -262,5 +357,6 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
     public interface IShadowActions
     {
         void OnMove(InputAction.CallbackContext context);
+        void OnManipulate(InputAction.CallbackContext context);
     }
 }
