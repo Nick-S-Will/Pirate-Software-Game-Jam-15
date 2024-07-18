@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,13 +10,13 @@ namespace ShadowAlchemy.Player
         [Header("Gamplay")]
         [SerializeField][Min(0f)] private float moveSpeed = 1f;
         [Header("Shadow Check")]
-        [SerializeField] private List<Light> lights;
         [SerializeField] private LayerMask obstacleMask;
         [Header("Debug")]
         [SerializeField] private Color lightGizmoColor = Color.white;
         [SerializeField] private Color shadowGizmoColor = Color.green, outOfRangeGizmoColor = Color.black;
         [SerializeField] private bool showLastShadowCheck;
 
+        private List<Light> lights = new();
         private Vector2 moveInput;
         private Vector3 targetPosition = Vector2.positiveInfinity;
         private List<RaycastHit> castHits = new();
@@ -30,7 +31,24 @@ namespace ShadowAlchemy.Player
             }
         }
 
-        public bool InShadow => CanMoveTo(transform.position);
+        /// <summary>
+        /// Array of colliders that currently creating shade for this
+        /// </summary>
+        public Collider[] ShadeColliders
+        {
+            get
+            {
+                if (!InShadow) return new Collider[0];
+
+                return castHits.Select(hitInfo => hitInfo.collider).Where(collider => collider != null).ToArray();
+            }
+        }
+        public bool InShadow => PointIsInShadow(transform.position);
+
+        private void Awake()
+        {
+            lights.AddRange(FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None));
+        }
 
         private void FixedUpdate()
         {
@@ -47,17 +65,17 @@ namespace ShadowAlchemy.Player
             if (moveInput == Vector2.zero) return;
 
             targetPosition = transform.position + MoveDelta;
-            if (!CanMoveTo(targetPosition)) return;
+            if (!PointIsInShadow(targetPosition)) return;
 
             transform.position = targetPosition;
         }
 
-        private bool CanMoveTo(Vector3 targetPosition)
+        private bool PointIsInShadow(Vector3 point)
         {
             castHits.Clear();
 
             var canMove = true;
-            foreach (var light in lights) if (PointIsVisibleFrom(targetPosition, light)) canMove = false;
+            foreach (var light in lights) if (PointIsVisibleFrom(point, light)) canMove = false;
 
             return canMove;
         }
@@ -85,6 +103,9 @@ namespace ShadowAlchemy.Player
                     if (PointOutOfRange(point, light)) break;
                     isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, float.MaxValue, obstacleMask);
                     break;
+                default:
+                    Debug.LogWarning($"Light type \"{light.type}\" isn't implemented");
+                    break;
             }
             castHits.Add(hitInfo);
 
@@ -94,48 +115,51 @@ namespace ShadowAlchemy.Player
         private bool PointOutOfRange(Vector3 point, Light light) => Vector3.Distance(point, light.transform.position) > light.range;
         private bool PointOutOfAngle(Vector3 point, Light light) => Vector3.Angle(light.transform.forward, point - light.transform.position) > light.spotAngle / 2;
 
+        #region Debug
         private void OnDrawGizmos()
         {
             if (showLastShadowCheck && Application.isPlaying && targetPosition != Vector3.positiveInfinity)
             {
-                var point = targetPosition;
                 for (int i = 0; i < lights.Count && i < castHits.Count; i++)
                 {
-                    var light = lights[i];
-                    var hitInfo = castHits[i];
-                    if (!light.enabled) continue;
-
-                    Vector3 endPoint;
-                    if (hitInfo.collider)
-                    {
-                        endPoint = hitInfo.point;
-                        Gizmos.color = shadowGizmoColor;
-                    }
-                    else
-                    {
-                        Gizmos.color = lightGizmoColor;
-                        switch (light.type)
-                        {
-                            case LightType.Spot:
-                                endPoint = light.transform.position;
-                                if (PointOutOfRange(point, light) || PointOutOfAngle(point, light)) Gizmos.color = outOfRangeGizmoColor;
-                                break;
-                            case LightType.Directional:
-                                endPoint = point - Camera.main.farClipPlane * light.transform.forward;
-                                break;
-                            case LightType.Point:
-                                endPoint = light.transform.position;
-                                if (PointOutOfRange(point, light)) Gizmos.color = outOfRangeGizmoColor;
-                                break;
-                            default:
-                                endPoint = point;
-                                break;
-                        }
-                    }
-
-                    Gizmos.DrawLine(point, endPoint);
+                    DrawLightGizmo(lights[i], castHits[i]);
                 }
             }
         }
+
+        private void DrawLightGizmo(Light light, RaycastHit hitInfo)
+        {
+            if (!light.enabled) return;
+
+            Vector3 endPoint;
+            if (hitInfo.collider)
+            {
+                endPoint = hitInfo.point;
+                Gizmos.color = shadowGizmoColor;
+            }
+            else
+            {
+                endPoint = light.transform.position;
+                Gizmos.color = lightGizmoColor;
+                switch (light.type)
+                {
+                    case LightType.Spot:
+                        if (PointOutOfRange(targetPosition, light) || PointOutOfAngle(targetPosition, light)) Gizmos.color = outOfRangeGizmoColor;
+                        break;
+                    case LightType.Directional:
+                        endPoint = targetPosition - Camera.main.farClipPlane * light.transform.forward;
+                        break;
+                    case LightType.Point:
+                        if (PointOutOfRange(targetPosition, light)) Gizmos.color = outOfRangeGizmoColor;
+                        break;
+                    default:
+                        endPoint = targetPosition;
+                        break;
+                }
+            }
+
+            Gizmos.DrawLine(targetPosition, endPoint);
+        }
+        #endregion
     }
 }
