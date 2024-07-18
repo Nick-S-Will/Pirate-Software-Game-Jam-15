@@ -43,7 +43,7 @@ namespace ShadowAlchemy.Player
 
         public void Manipulate(InputAction.CallbackContext context)
         {
-            if (!context.performed) return;
+            if (!enabled || !context.performed) return;
 
             if (Target != null)
             {
