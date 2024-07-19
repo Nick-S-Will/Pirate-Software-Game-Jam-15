@@ -21,7 +21,10 @@ namespace ShadowAlchemy.Player
             {
                 if (target == value) return;
 
+                if (target) target.StopHighlight();
                 target = value;
+                if (target) target.Highlight();
+
                 OnTargetChanged.Invoke();
             }
         }
