@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 namespace ShadowAlchemy.Player
 {
     public class ShadowTraversal : MonoBehaviour
     {
-        [Header("Gamplay")]
+        [Header("Gameplay")]
         [SerializeField][Min(0f)] private float moveSpeed = 1f;
         [Header("Shadow Check")]
         [SerializeField] private LayerMask obstacleMask;
+        [Header("Events")]
+        public UnityEvent OnShadowExited;
         [Header("Debug")]
         [SerializeField] private Color lightGizmoColor = Color.white;
         [SerializeField] private Color shadowGizmoColor = Color.green, outOfRangeGizmoColor = Color.black;
@@ -38,12 +41,21 @@ namespace ShadowAlchemy.Player
         {
             get
             {
-                if (!InShadow) return new Collider[0];
+                if (!enabled || !InShadow) return new Collider[0];
 
                 return castHits.Select(hitInfo => hitInfo.collider).Where(collider => collider != null).ToArray();
             }
         }
-        public bool InShadow => PointIsInShadow(transform.position);
+        public bool InShadow
+        {
+            get
+            {
+                var inShadow = enabled && PointIsInShadow(transform.position);
+                if (enabled && !inShadow) OnShadowExited.Invoke();
+
+                return inShadow;
+            }
+        }
 
         private void Awake()
         {
@@ -94,14 +106,16 @@ namespace ShadowAlchemy.Player
             {
                 case LightType.Spot:
                     if (PointOutOfRange(point, light) || PointOutOfAngle(point, light)) break;
-                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, float.MaxValue, obstacleMask);
+                    var distanceToSpot = Vector3.Distance(point, light.transform.position);
+                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, distanceToSpot, obstacleMask);
                     break;
                 case LightType.Directional:
                     isVisible = !Physics.Raycast(point, -light.transform.forward, out hitInfo, float.MaxValue, obstacleMask);
                     break;
                 case LightType.Point:
                     if (PointOutOfRange(point, light)) break;
-                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, float.MaxValue, obstacleMask);
+                    var distanceToPoint = Vector3.Distance(point, light.transform.position);
+                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, distanceToPoint, obstacleMask);
                     break;
                 default:
                     Debug.LogWarning($"Light type \"{light.type}\" isn't implemented");
