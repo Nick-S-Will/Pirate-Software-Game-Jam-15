@@ -10,7 +10,9 @@ namespace ShadowAlchemy.Player
     {
         [Header("Gameplay")]
         [SerializeField][Min(0f)] private float moveSpeed = 1f;
-        [Header("Shadow Check")]
+        [Header("Physics Checks")]
+        [SerializeField][Min(0f)] private float surfaceOffset = .005f;
+        [SerializeField][Range(0f, 180f)] private float maxSlopeAngle = 50f;
         [SerializeField] private LayerMask obstacleMask;
         [Header("Events")]
         public UnityEvent OnShadowExited;
@@ -22,17 +24,7 @@ namespace ShadowAlchemy.Player
         private List<Light> lights = new();
         private Vector2 moveInput;
         private Vector3 targetPosition = Vector2.positiveInfinity;
-        private List<RaycastHit> castHits = new();
-
-        private Vector3 MoveDelta
-        {
-            get
-            {
-                var localSpaceInput = new Vector3(moveInput.x, 0f, moveInput.y);
-                var worldSpaceInput = Vector3.ProjectOnPlane(Camera.main.transform.rotation * localSpaceInput, Vector3.up);
-                return moveSpeed * Time.fixedDeltaTime * worldSpaceInput.normalized;
-            }
-        }
+        private List<RaycastHit> shadeCastHits = new();
 
         /// <summary>
         /// Array of colliders that currently creating shade for this
@@ -43,7 +35,7 @@ namespace ShadowAlchemy.Player
             {
                 if (!enabled || !InShadow) return new Collider[0];
 
-                return castHits.Select(hitInfo => hitInfo.collider).Where(collider => collider != null).ToArray();
+                return shadeCastHits.Select(hitInfo => hitInfo.collider).Where(collider => collider != null).ToArray();
             }
         }
         public bool InShadow
@@ -72,19 +64,51 @@ namespace ShadowAlchemy.Player
             moveInput = context.ReadValue<Vector2>();
         }
 
+        #region Movement Check
         private void TryMove()
         {
             if (moveInput == Vector2.zero) return;
 
-            targetPosition = transform.position + MoveDelta;
-            if (!PointIsInShadow(targetPosition)) return;
+            var moveDelta = CalculateMoveDelta();
+            targetPosition = transform.position + moveDelta;
+            if (!CanMove(moveDelta, out RaycastHit hitInfo) && !CanClimb(hitInfo) || !PointIsInShadow(targetPosition)) return;
 
-            transform.position = targetPosition;
+            if (hitInfo.collider)
+            {
+                transform.position = hitInfo.point + surfaceOffset * hitInfo.normal;
+                transform.up = hitInfo.normal;
+            }
+            else transform.position = targetPosition;
         }
 
+        private Vector3 CalculateMoveDelta()
+        {
+            var localSpaceInput = new Vector3(moveInput.x, 0f, moveInput.y);
+            var worldSpaceInput = transform.rotation * Vector3.ProjectOnPlane(Camera.main.transform.rotation * localSpaceInput, Vector3.up);
+            return moveSpeed * Time.fixedDeltaTime * worldSpaceInput.normalized;
+        }
+
+        private bool CanMove(Vector3 moveDelta, out RaycastHit obstacleHit)
+        {
+            var targetPosition = transform.position + moveDelta;
+            if (!Physics.Raycast(targetPosition, -transform.up, out obstacleHit, 2 * surfaceOffset, obstacleMask)) return false;
+
+            return !Physics.Raycast(transform.position, moveDelta, out obstacleHit, moveDelta.magnitude, obstacleMask);
+        }
+
+        private bool CanClimb(RaycastHit obstacleHit)
+        {
+            if (obstacleHit.collider == null) return false; 
+
+            var angleToSurface = Vector3.Angle(Vector3.up, obstacleHit.normal);
+            return angleToSurface <= maxSlopeAngle;
+        }
+        #endregion
+
+        #region Shadow Check
         private bool PointIsInShadow(Vector3 point)
         {
-            castHits.Clear();
+            shadeCastHits.Clear();
 
             var canMove = true;
             foreach (var light in lights) if (PointIsVisibleFrom(point, light)) canMove = false;
@@ -97,7 +121,7 @@ namespace ShadowAlchemy.Player
             RaycastHit hitInfo = default;
             if (!light.enabled)
             {
-                castHits.Add(hitInfo);
+                shadeCastHits.Add(hitInfo);
                 return false;
             }
 
@@ -121,22 +145,23 @@ namespace ShadowAlchemy.Player
                     Debug.LogWarning($"Light type \"{light.type}\" isn't implemented");
                     break;
             }
-            castHits.Add(hitInfo);
+            shadeCastHits.Add(hitInfo);
 
             return isVisible;
         }
 
         private bool PointOutOfRange(Vector3 point, Light light) => Vector3.Distance(point, light.transform.position) > light.range;
         private bool PointOutOfAngle(Vector3 point, Light light) => Vector3.Angle(light.transform.forward, point - light.transform.position) > light.spotAngle / 2;
+        #endregion
 
         #region Debug
         private void OnDrawGizmos()
         {
             if (showLastShadowCheck && Application.isPlaying && targetPosition != Vector3.positiveInfinity)
             {
-                for (int i = 0; i < lights.Count && i < castHits.Count; i++)
+                for (int i = 0; i < lights.Count && i < shadeCastHits.Count; i++)
                 {
-                    DrawLightGizmo(lights[i], castHits[i]);
+                    DrawLightGizmo(lights[i], shadeCastHits[i]);
                 }
             }
         }
