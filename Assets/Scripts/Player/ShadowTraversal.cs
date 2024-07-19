@@ -11,7 +11,8 @@ namespace ShadowAlchemy.Player
         [Header("Gameplay")]
         [SerializeField][Min(0f)] private float moveSpeed = 1f;
         [Header("Physics Checks")]
-        [SerializeField][Min(0f)] private float surfaceOffset = .005f;
+        [SerializeField][Min(0f)] private float groundOffset = .005f;
+        [SerializeField][Min(0f)] private float maxGroundDistance = .05f;
         [SerializeField][Range(0f, 180f)] private float maxSlopeAngle = 50f;
         [SerializeField] private LayerMask obstacleMask;
         [Header("Events")]
@@ -54,6 +55,11 @@ namespace ShadowAlchemy.Player
             lights.AddRange(FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None));
         }
 
+        private void Start()
+        {
+            if (!CanMove(Vector3.zero, out _, out _)) Debug.Log($"{nameof(ShadowTraversal)} isn't placed in range of a surface");
+        }
+
         private void FixedUpdate()
         {
             TryMove();
@@ -71,14 +77,11 @@ namespace ShadowAlchemy.Player
 
             var moveDelta = CalculateMoveDelta();
             targetPosition = transform.position + moveDelta;
-            if (!CanMove(moveDelta, out RaycastHit hitInfo) && !CanClimb(hitInfo) || !PointIsInShadow(targetPosition)) return;
+            if (!CanMove(moveDelta, out RaycastHit groundHit, out RaycastHit obstacleHit) && !CanClimb(obstacleHit)) return;
+            if (!PointIsInShadow(targetPosition)) return;
 
-            if (hitInfo.collider)
-            {
-                transform.position = hitInfo.point + surfaceOffset * hitInfo.normal;
-                transform.up = hitInfo.normal;
-            }
-            else transform.position = targetPosition;
+            if (obstacleHit.collider) MoveToHitPoint(obstacleHit);
+            else if (groundHit.collider) MoveToHitPoint(groundHit);
         }
 
         private Vector3 CalculateMoveDelta()
@@ -88,12 +91,13 @@ namespace ShadowAlchemy.Player
             return moveSpeed * Time.fixedDeltaTime * worldSpaceInput.normalized;
         }
 
-        private bool CanMove(Vector3 moveDelta, out RaycastHit obstacleHit)
+        private bool CanMove(Vector3 moveDelta, out RaycastHit groundHit, out RaycastHit obstacleHit)
         {
             var targetPosition = transform.position + moveDelta;
-            if (!Physics.Raycast(targetPosition, -transform.up, out obstacleHit, 2 * surfaceOffset, obstacleMask)) return false;
+            var onGround = Physics.Raycast(targetPosition, -transform.up, out groundHit, maxGroundDistance, obstacleMask);
+            var touchingObstacle = Physics.Raycast(transform.position, moveDelta, out obstacleHit, moveDelta.magnitude, obstacleMask);
 
-            return !Physics.Raycast(transform.position, moveDelta, out obstacleHit, moveDelta.magnitude, obstacleMask);
+            return onGround && !touchingObstacle;
         }
 
         private bool CanClimb(RaycastHit obstacleHit)
@@ -102,6 +106,12 @@ namespace ShadowAlchemy.Player
 
             var angleToSurface = Vector3.Angle(Vector3.up, obstacleHit.normal);
             return angleToSurface <= maxSlopeAngle;
+        }
+
+        private void MoveToHitPoint(RaycastHit hitInfo)
+        {
+            transform.position = hitInfo.point + groundOffset * hitInfo.normal;
+            transform.up = hitInfo.normal;
         }
         #endregion
 
