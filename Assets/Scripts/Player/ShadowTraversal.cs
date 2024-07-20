@@ -81,7 +81,7 @@ namespace ShadowAlchemy.Player
             if (!PointIsInShadow(targetPosition)) return;
 
             if (obstacleHit.collider) MoveToHitPoint(obstacleHit);
-            else if (groundHit.collider) MoveToHitPoint(groundHit);
+            else if (CanClimb(groundHit)) MoveToHitPoint(groundHit);
         }
 
         private Vector3 CalculateMoveDelta()
@@ -100,11 +100,11 @@ namespace ShadowAlchemy.Player
             return onGround && !touchingObstacle;
         }
 
-        private bool CanClimb(RaycastHit obstacleHit)
+        private bool CanClimb(RaycastHit hitInfo)
         {
-            if (obstacleHit.collider == null) return false; 
+            if (hitInfo.collider == null) return false; 
 
-            var angleToSurface = Vector3.Angle(Vector3.up, obstacleHit.normal);
+            var angleToSurface = Vector3.Angle(Vector3.up, hitInfo.normal);
             return angleToSurface <= maxSlopeAngle;
         }
 
