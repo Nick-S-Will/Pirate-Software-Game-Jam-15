@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 2
-  groundOffset: 0.001
+  groundOffset: 0.005
   maxGroundDistance: 0.05
   maxSlopeAngle: 50
   obstacleMask:
