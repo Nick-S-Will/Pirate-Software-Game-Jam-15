@@ -22,6 +22,9 @@ namespace ShadowAlchemy.Player
         [SerializeField] private Color shadowGizmoColor = Color.green, outOfRangeGizmoColor = Color.black;
         [SerializeField] private bool showLastShadowCheck;
 
+        // [Header("Movement Indicator")]
+        // public GameObject movementIndicatorSprite;
+
         private List<Light> lights = new();
         private Vector2 moveInput;
         private Vector3 targetPosition = Vector2.positiveInfinity;
@@ -163,6 +166,15 @@ namespace ShadowAlchemy.Player
         private bool PointOutOfRange(Vector3 point, Light light) => Vector3.Distance(point, light.transform.position) > light.range;
         private bool PointOutOfAngle(Vector3 point, Light light) => Vector3.Angle(light.transform.forward, point - light.transform.position) > light.spotAngle / 2;
         #endregion
+
+        //Audrey added this bit vv
+        // #region Shadow Visuals
+        //     private void addVisuals {
+                
+        //         //does stuff, do in two shakes
+        //     }  
+        // #endregion
+
 
         #region Debug
         private void OnDrawGizmos()
