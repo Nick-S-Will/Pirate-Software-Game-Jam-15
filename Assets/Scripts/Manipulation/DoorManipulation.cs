@@ -11,7 +11,7 @@ namespace ShadowAlchemy.Manipulation
         [SerializeField] private Vector3 rotationAxis = Vector3.up;
         [SerializeField][Min(0f)] private float rotationAngle = 90f, rotationSpeed = 90f;
         [Space]
-        public UnityEvent OnOpenDoor, OnCloseDoor;
+        public UnityEvent OnOpenDoor, OnDoorOpened, OnCloseDoor, OnDoorClosed;
         [Header("Debug")]
         [SerializeField] private Color gizmoColor = Color.white;
         [SerializeField] private bool showRotationAxis;
@@ -48,6 +48,9 @@ namespace ShadowAlchemy.Manipulation
 
                 yield return new WaitForFixedUpdate();
             }
+
+            if (open) OnDoorOpened.Invoke();
+            else OnDoorClosed.Invoke();
 
             useDoorRoutine = null;
             OnCanBeManipulated.Invoke();
