@@ -225,6 +225,17 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""ed3ed4f9-feed-45b0-bfe6-cf3942b679e8"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Manipulate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""8b2faf8f-cc25-4f1e-b0fd-28fb13eaf402"",
                     ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",

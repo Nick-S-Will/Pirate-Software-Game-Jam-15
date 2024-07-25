@@ -1,5 +1,6 @@
 using Displayable;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace ShadowAlchemy.Player.UI
@@ -11,14 +12,34 @@ namespace ShadowAlchemy.Player.UI
 
         private void Awake()
         {
-            if (displayObject == null) Debug.LogError($"{nameof(displayObject)} not assigned");
             if (graphicsParent == null) Debug.LogError($"{nameof(graphicsParent)} not assigned");
             if (targetText == null) Debug.LogError($"{nameof(targetText)} not assigned");
 
-            displayObject.OnTargetChanged.AddListener(UpdateText);
-            displayObject.OnManipulated.AddListener(UpdateText);
-
+            SetListeners(null, displayObject);
             UpdateText();
+        }
+
+        private void SetListeners(ShadowManipulation oldObject, ShadowManipulation newObject)
+        {
+            if (oldObject)
+            {
+                oldObject.OnTargetChanged.RemoveListener(UpdateText);
+                oldObject.OnTargetCanBeManipulated.RemoveListener(UpdateText);
+                oldObject.OnManipulated.RemoveListener(UpdateText);
+            }
+
+            if (newObject)
+            {
+                newObject.OnTargetChanged.AddListener(UpdateText);
+                newObject.OnTargetCanBeManipulated.AddListener(UpdateText);
+                newObject.OnManipulated.AddListener(UpdateText);
+            }
+        }
+
+        public override void SetObject(ShadowManipulation newObject)
+        {
+            SetListeners(displayObject, newObject);
+            base.SetObject(newObject);
         }
 
         public override void UpdateText()
@@ -26,7 +47,7 @@ namespace ShadowAlchemy.Player.UI
             var target = displayObject.Target;
             targetText.text = target ? target.ActionName : "";
 
-            graphicsParent.SetActive(target);
+            graphicsParent.SetActive(target && target.CanBeManipulated);
         }
     }
 }

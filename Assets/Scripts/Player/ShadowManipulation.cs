@@ -9,7 +9,7 @@ namespace ShadowAlchemy.Player
     [RequireComponent(typeof(ShadowTraversal))]
     public class ShadowManipulation : MonoBehaviour
     {
-        public UnityEvent OnTargetChanged, OnManipulated, OnManipulateFailed;
+        public UnityEvent OnTargetChanged, OnTargetCanBeManipulated, OnManipulated, OnManipulateFailed;
 
         private ShadowTraversal shadowTraversal;
         private ManipulationBehaviour target;
@@ -21,9 +21,17 @@ namespace ShadowAlchemy.Player
             {
                 if (target == value) return;
 
-                if (target) target.StopHighlight();
+                if (target)
+                {
+                    target.OnCanBeManipulated.RemoveListener(PropogateEvent);
+                    target.StopHighlight();
+                }
                 target = value;
-                if (target) target.Highlight();
+                if (target)
+                {
+                    target.OnCanBeManipulated.AddListener(PropogateEvent);
+                    target.Highlight();
+                }
 
                 OnTargetChanged.Invoke();
             }
@@ -44,18 +52,7 @@ namespace ShadowAlchemy.Player
             LookForTarget();
         }
 
-        public void Manipulate(InputAction.CallbackContext context)
-        {
-            if (!enabled || !context.performed) return;
-
-            if (Target != null)
-            {
-                Target.Manipulate();
-                OnManipulated.Invoke();
-            }
-            else OnManipulateFailed.Invoke();
-        }
-
+        #region Look For Target
         private void LookForTarget()
         {
             var shadeColliders = shadowTraversal.ShadeColliders;
@@ -90,6 +87,21 @@ namespace ShadowAlchemy.Player
             }
 
             return targets[index];
+        }
+        #endregion
+
+        private void PropogateEvent() => OnTargetCanBeManipulated.Invoke();
+
+        public void Manipulate(InputAction.CallbackContext context)
+        {
+            if (!enabled || !context.performed) return;
+
+            if (Target && Target.CanBeManipulated)
+            {
+                Target.Manipulate();
+                OnManipulated.Invoke();
+            }
+            else OnManipulateFailed.Invoke();
         }
     }
 }

@@ -1,42 +1,60 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace ShadowAlchemy.Manipulation
 {
     [RequireComponent(typeof(Collider))]
     public abstract class ManipulationBehaviour : MonoBehaviour
     {
+        [SerializeField] private string useActionName = "Use";
+        [SerializeField] private string restoreActionName = "Restore";
+        [Space]
         [SerializeField] private MeshRenderer meshRenderer;
         [SerializeField] private Color highlightColor = Color.white;
         [SerializeField] [Range(0f, 1f)] private float highlightColorBias = .5f;
-        [Space]
-        [SerializeField] private string useActionName = "Use";
-        [SerializeField] private string restoreActionName = "Restore";
 
+        private Material material;
         private Color startColor;
+        private bool wasUsed, canBeManipulated = true;
 
-        private bool wasUsed;
+        [HideInInspector] public UnityEvent OnCanBeManipulated;
 
         public string ActionName => wasUsed ? restoreActionName : useActionName;
+        public virtual bool CanBeManipulated
+        {
+            get => canBeManipulated;
+            protected set
+            {
+                var invokeEvent = !canBeManipulated && value;
 
-        private void Awake()
+                canBeManipulated = value;
+
+                if (invokeEvent) OnCanBeManipulated.Invoke();
+            }
+        }
+
+        protected virtual void Awake()
         {
             if (meshRenderer == null) Debug.LogError($"{nameof(meshRenderer)} not assigned");
 
-            startColor = meshRenderer.material.color;
+            material = meshRenderer.material;
+            startColor = material.color;
         }
 
         public void Highlight()
         {
-            meshRenderer.material.color = Color.Lerp(startColor, highlightColor, highlightColorBias);
+            material.color = Color.Lerp(startColor, highlightColor, highlightColorBias);
         }
 
         public void StopHighlight()
         {
-            meshRenderer.material.color = startColor;
+            material.color = startColor;
         }
 
         public void Manipulate()
         {
+            if (!CanBeManipulated) return;
+
             if (wasUsed) Restore();
             else Use();
 
