@@ -23,12 +23,12 @@ namespace ShadowAlchemy.Player
         [SerializeField] private bool showLastShadowCheck;
 
         private List<Light> lights = new();
-        private Vector2 moveInput;
+        private Vector2 moveInput; 
         private Vector3 targetPosition = Vector2.positiveInfinity;
         private List<RaycastHit> shadeCastHits = new();
 
         /// <summary>
-        /// Array of colliders that currently create shade for this
+        /// Array of colliders that currently creating shade for this
         /// </summary>
         public Collider[] ShadeColliders
         {
@@ -39,7 +39,17 @@ namespace ShadowAlchemy.Player
                 return shadeCastHits.Select(hitInfo => hitInfo.collider).Where(collider => collider != null).ToArray();
             }
         }
-        public bool InShadow { get; private set; }
+        public Vector2 MoveInput => moveInput;
+        public bool InShadow
+        {
+            get
+            {
+                var inShadow = enabled && PointIsInShadow(transform.position);
+                if (enabled && !inShadow) OnShadowExited.Invoke();
+
+                return inShadow;
+            }
+        }
 
         private void Awake()
         {
@@ -53,71 +63,13 @@ namespace ShadowAlchemy.Player
 
         private void FixedUpdate()
         {
-            UpdateInShadow();
-            if (InShadow) TryMove();
+            TryMove();
         }
 
         public void SetMoveInput(InputAction.CallbackContext context)
         {
             moveInput = context.ReadValue<Vector2>();
         }
-
-        #region Shadow Check
-        private void UpdateInShadow()
-        {
-            var inShadow = PointIsInShadow(transform.position, true);
-            if (InShadow && !inShadow) OnShadowExited.Invoke();
-
-            InShadow = inShadow;
-        }
-
-        private bool PointIsInShadow(Vector3 point, bool recordCasts = false)
-        {
-            if (recordCasts) shadeCastHits.Clear();
-
-            var canMove = true;
-            foreach (var light in lights) if (PointIsVisibleFrom(point, light, recordCasts)) canMove = false;
-
-            return canMove;
-        }
-
-        private bool PointIsVisibleFrom(Vector3 point, Light light, bool recordCast = false)
-        {
-            RaycastHit hitInfo = default;
-            if (!light.enabled)
-            {
-                if (recordCast) shadeCastHits.Add(hitInfo);
-                return false;
-            }
-
-            var isVisible = false;
-            switch (light.type)
-            {
-                case LightType.Spot:
-                    if (PointOutOfRange(point, light) || PointOutOfAngle(point, light)) break;
-                    var distanceToSpot = Vector3.Distance(point, light.transform.position);
-                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, distanceToSpot, obstacleMask);
-                    break;
-                case LightType.Directional:
-                    isVisible = !Physics.Raycast(point, -light.transform.forward, out hitInfo, float.MaxValue, obstacleMask);
-                    break;
-                case LightType.Point:
-                    if (PointOutOfRange(point, light)) break;
-                    var distanceToPoint = Vector3.Distance(point, light.transform.position);
-                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, distanceToPoint, obstacleMask);
-                    break;
-                default:
-                    Debug.LogWarning($"Light type \"{light.type}\" isn't implemented");
-                    break;
-            }
-            if (recordCast) shadeCastHits.Add(hitInfo);
-
-            return isVisible;
-        }
-
-        private bool PointOutOfRange(Vector3 point, Light light) => Vector3.Distance(point, light.transform.position) > light.range;
-        private bool PointOutOfAngle(Vector3 point, Light light) => Vector3.Angle(light.transform.forward, point - light.transform.position) > light.spotAngle / 2;
-        #endregion
 
         #region Movement Check
         private void TryMove()
@@ -162,6 +114,55 @@ namespace ShadowAlchemy.Player
             transform.position = hitInfo.point + groundOffset * hitInfo.normal;
             transform.up = hitInfo.normal;
         }
+        #endregion
+
+        #region Shadow Check
+        private bool PointIsInShadow(Vector3 point)
+        {
+            shadeCastHits.Clear();
+
+            var canMove = true;
+            foreach (var light in lights) if (PointIsVisibleFrom(point, light)) canMove = false;
+
+            return canMove;
+        }
+
+        private bool PointIsVisibleFrom(Vector3 point, Light light)
+        {
+            RaycastHit hitInfo = default;
+            if (!light.enabled)
+            {
+                shadeCastHits.Add(hitInfo);
+                return false;
+            }
+
+            var isVisible = false;
+            switch (light.type)
+            {
+                case LightType.Spot:
+                    if (PointOutOfRange(point, light) || PointOutOfAngle(point, light)) break;
+                    var distanceToSpot = Vector3.Distance(point, light.transform.position);
+                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, distanceToSpot, obstacleMask);
+                    break;
+                case LightType.Directional:
+                    isVisible = !Physics.Raycast(point, -light.transform.forward, out hitInfo, float.MaxValue, obstacleMask);
+                    break;
+                case LightType.Point:
+                    if (PointOutOfRange(point, light)) break;
+                    var distanceToPoint = Vector3.Distance(point, light.transform.position);
+                    isVisible = !Physics.Raycast(point, light.transform.position - point, out hitInfo, distanceToPoint, obstacleMask);
+                    break;
+                default:
+                    Debug.LogWarning($"Light type \"{light.type}\" isn't implemented");
+                    break;
+            }
+            shadeCastHits.Add(hitInfo);
+
+            return isVisible;
+        }
+
+        private bool PointOutOfRange(Vector3 point, Light light) => Vector3.Distance(point, light.transform.position) > light.range;
+        private bool PointOutOfAngle(Vector3 point, Light light) => Vector3.Angle(light.transform.forward, point - light.transform.position) > light.spotAngle / 2;
         #endregion
 
         #region Debug
