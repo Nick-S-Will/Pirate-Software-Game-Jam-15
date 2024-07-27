@@ -22,11 +22,8 @@ namespace ShadowAlchemy.Player
         [SerializeField] private Color shadowGizmoColor = Color.green, outOfRangeGizmoColor = Color.black;
         [SerializeField] private bool showLastShadowCheck;
 
-        // [Header("Movement Indicator")]
-        // public GameObject movementIndicatorSprite;
-
         private List<Light> lights = new();
-        private Vector2 moveInput;
+        public static Vector2 moveInput; 
         private Vector3 targetPosition = Vector2.positiveInfinity;
         private List<RaycastHit> shadeCastHits = new();
 
