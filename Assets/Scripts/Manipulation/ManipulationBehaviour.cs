@@ -6,9 +6,10 @@ namespace ShadowAlchemy.Manipulation
     [RequireComponent(typeof(Collider))]
     public abstract class ManipulationBehaviour : MonoBehaviour
     {
+        [Header("Action Names")]
         [SerializeField] private string useActionName = "Use";
         [SerializeField] private string restoreActionName = "Restore";
-        [Space]
+        [Header("Mesh Highlighting")]
         [SerializeField] private MeshRenderer meshRenderer;
         [SerializeField] private Color highlightColor = Color.white;
         [SerializeField] [Range(0f, 1f)] private float highlightColorBias = .5f;
@@ -51,8 +52,14 @@ namespace ShadowAlchemy.Manipulation
             material.color = startColor;
         }
 
+        [ContextMenu("Manipulate")]
         public void Manipulate()
         {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning($"{nameof(ManipulationBehaviour)}s cannot be {nameof(Manipulate)}d outside of play mode");
+                return;
+            }
             if (!CanBeManipulated) return;
 
             if (wasUsed) Restore();

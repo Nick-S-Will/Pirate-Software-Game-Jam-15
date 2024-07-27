@@ -42,7 +42,6 @@ namespace ShadowAlchemy.Manipulation
             OnLoad.Invoke();
         }
 
-        [ContextMenu("Try Launch")]
         private void TryLaunch()
         {
             for (int i = 0; i < projectiles.Length; i++)

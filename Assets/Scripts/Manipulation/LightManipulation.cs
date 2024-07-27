@@ -7,6 +7,7 @@ namespace ShadowAlchemy.Manipulation
     {
         [Space]
         [SerializeField] private new Light light;
+        [SerializeField] private bool lightEnabledOnAwake = true;
         [Space]
         public UnityEvent OnEnableLight, OnDisableLight;
 
@@ -16,7 +17,8 @@ namespace ShadowAlchemy.Manipulation
 
             if (light == null) Debug.LogError($"{nameof(light)} not assigned");
 
-            Manipulate();
+            if (lightEnabledOnAwake) Manipulate();
+            else Restore();
         }
 
         protected override void Use()
