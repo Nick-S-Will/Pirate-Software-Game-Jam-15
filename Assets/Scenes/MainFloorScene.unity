@@ -3629,10 +3629,6 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: -9164601111527362948, guid: e21bb8072a02a89409d5c71e9876225b, type: 3}
-    - target: {fileID: 6294660700655844964, guid: 743f0238f0449b34cbd83446d3492b6f, type: 3}
-      propertyPath: speed
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8312132846663769966, guid: 743f0238f0449b34cbd83446d3492b6f, type: 3}
       propertyPath: m_Name
       value: '"Train"'

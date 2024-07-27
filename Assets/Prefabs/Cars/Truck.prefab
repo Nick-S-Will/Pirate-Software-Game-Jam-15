@@ -3486,7 +3486,7 @@ MonoBehaviour:
   OnCanBeManipulated:
     m_PersistentCalls:
       m_Calls: []
-  speed: 2
+  speed: 1.8
   frontCastPoint: {fileID: 7923651185967440804}
   backCastPoint: {fileID: 6703474679446705504}
   stopDistance: 0.2
