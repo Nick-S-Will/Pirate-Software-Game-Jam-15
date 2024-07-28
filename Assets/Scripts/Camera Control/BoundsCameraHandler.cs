@@ -21,8 +21,6 @@ namespace ShadowAlchemy.CameraControl
 
             childCameras = GetComponentsInChildren<BoundsCamera>();
             if (childCameras.Length == 0) Debug.LogWarning($"{nameof(BoundsCameraHandler)} has no child {nameof(BoundsCamera)}s");
-
-            foreach (var childCam in childCameras) childCam.enabled = false;
         }
 
         private void OnEnable()
@@ -33,6 +31,11 @@ namespace ShadowAlchemy.CameraControl
         private void OnDisable()
         {
             if (currentCamera) currentCamera.enabled = false;
+        }
+
+        private void Start()
+        {
+            foreach (var childCam in childCameras) childCam.enabled = false;
         }
 
         private void Update()
