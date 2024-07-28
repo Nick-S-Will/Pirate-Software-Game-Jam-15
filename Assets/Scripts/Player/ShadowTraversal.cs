@@ -28,7 +28,7 @@ namespace ShadowAlchemy.Player
         private List<RaycastHit> shadeCastHits = new();
 
         /// <summary>
-        /// Array of colliders that currently creating shade for this
+        /// Array of colliders that currently create shade for this
         /// </summary>
         public Collider[] ShadeColliders
         {
@@ -40,16 +40,7 @@ namespace ShadowAlchemy.Player
             }
         }
         public Vector2 MoveInput => moveInput;
-        public bool InShadow
-        {
-            get
-            {
-                var inShadow = enabled && PointIsInShadow(transform.position);
-                if (enabled && !inShadow) OnShadowExited.Invoke();
-
-                return inShadow;
-            }
-        }
+        public bool InShadow { get; private set; }
 
         private void Awake()
         {
@@ -63,7 +54,8 @@ namespace ShadowAlchemy.Player
 
         private void FixedUpdate()
         {
-            TryMove();
+            UpdateInShadow();
+            if (InShadow) TryMove();
         }
 
         public void SetMoveInput(InputAction.CallbackContext context)
@@ -71,68 +63,31 @@ namespace ShadowAlchemy.Player
             moveInput = context.ReadValue<Vector2>();
         }
 
-        #region Movement Check
-        private void TryMove()
-        {
-            if (moveInput == Vector2.zero) return;
-
-            var moveDelta = CalculateMoveDelta();
-            targetPosition = transform.position + moveDelta;
-            if (!CanMove(moveDelta, out RaycastHit groundHit, out RaycastHit obstacleHit) && !CanClimb(obstacleHit)) return;
-            if (!PointIsInShadow(targetPosition)) return;
-
-            if (obstacleHit.collider) MoveToHitPoint(obstacleHit);
-            else if (CanClimb(groundHit)) MoveToHitPoint(groundHit);
-        }
-
-        private Vector3 CalculateMoveDelta()
-        {
-            var localSpaceInput = new Vector3(moveInput.x, 0f, moveInput.y);
-            var worldSpaceInput = transform.rotation * Vector3.ProjectOnPlane(Camera.main.transform.rotation * localSpaceInput, Vector3.up);
-            return moveSpeed * Time.fixedDeltaTime * worldSpaceInput.normalized;
-        }
-
-        private bool CanMove(Vector3 moveDelta, out RaycastHit groundHit, out RaycastHit obstacleHit)
-        {
-            var targetPosition = transform.position + moveDelta;
-            var onGround = Physics.Raycast(targetPosition, -transform.up, out groundHit, maxGroundDistance, obstacleMask);
-            var touchingObstacle = Physics.Raycast(transform.position, moveDelta, out obstacleHit, moveDelta.magnitude, obstacleMask);
-
-            return onGround && !touchingObstacle;
-        }
-
-        private bool CanClimb(RaycastHit hitInfo)
-        {
-            if (hitInfo.collider == null) return false; 
-
-            var angleToSurface = Vector3.Angle(Vector3.up, hitInfo.normal);
-            return angleToSurface <= maxSlopeAngle;
-        }
-
-        private void MoveToHitPoint(RaycastHit hitInfo)
-        {
-            transform.position = hitInfo.point + groundOffset * hitInfo.normal;
-            transform.up = hitInfo.normal;
-        }
-        #endregion
-
         #region Shadow Check
-        private bool PointIsInShadow(Vector3 point)
+        private void UpdateInShadow()
         {
-            shadeCastHits.Clear();
+            var newInShadow = PointIsInShadow(transform.position, true);
+            if (InShadow && !newInShadow) OnShadowExited.Invoke();
+
+            InShadow = newInShadow;
+        }
+
+        private bool PointIsInShadow(Vector3 point, bool recordCasts = false)
+        {
+            if (recordCasts) shadeCastHits.Clear();
 
             var canMove = true;
-            foreach (var light in lights) if (PointIsVisibleFrom(point, light)) canMove = false;
+            foreach (var light in lights) if (PointIsVisibleFrom(point, light, recordCasts)) canMove = false;
 
             return canMove;
         }
 
-        private bool PointIsVisibleFrom(Vector3 point, Light light)
+        private bool PointIsVisibleFrom(Vector3 point, Light light, bool recordCast = false)
         {
             RaycastHit hitInfo = default;
             if (!light.enabled)
             {
-                shadeCastHits.Add(hitInfo);
+                if (recordCast) shadeCastHits.Add(hitInfo);
                 return false;
             }
 
@@ -156,13 +111,57 @@ namespace ShadowAlchemy.Player
                     Debug.LogWarning($"Light type \"{light.type}\" isn't implemented");
                     break;
             }
-            shadeCastHits.Add(hitInfo);
+            if (recordCast) shadeCastHits.Add(hitInfo);
 
             return isVisible;
         }
 
         private bool PointOutOfRange(Vector3 point, Light light) => Vector3.Distance(point, light.transform.position) > light.range;
         private bool PointOutOfAngle(Vector3 point, Light light) => Vector3.Angle(light.transform.forward, point - light.transform.position) > light.spotAngle / 2;
+        #endregion
+
+        #region Movement Check
+        private void TryMove()
+        {
+            if (moveInput == Vector2.zero) return;
+
+            var moveDelta = CalculateMoveDelta();
+            targetPosition = transform.position + moveDelta;
+            if (!CanMove(moveDelta, out RaycastHit groundHit, out RaycastHit obstacleHit) || !PointIsInShadow(targetPosition)) return;
+
+            if (obstacleHit.collider) MoveToHitPoint(obstacleHit);
+            else if (groundHit.collider) MoveToHitPoint(groundHit);
+        }
+
+        private Vector3 CalculateMoveDelta()
+        {
+            var localSpaceInput = new Vector3(moveInput.x, 0f, moveInput.y);
+            var worldSpaceInput = transform.rotation * Vector3.ProjectOnPlane(Camera.main.transform.rotation * localSpaceInput, Vector3.up);
+            return moveSpeed * Time.fixedDeltaTime * worldSpaceInput.normalized;
+        }
+
+        private bool CanMove(Vector3 moveDelta, out RaycastHit groundHit, out RaycastHit obstacleHit)
+        {
+            var targetPosition = transform.position + moveDelta;
+            var onGround = Physics.Raycast(targetPosition, -transform.up, out groundHit, maxGroundDistance, obstacleMask);
+            var touchingObstacle = Physics.Raycast(transform.position, moveDelta, out obstacleHit, moveDelta.magnitude, obstacleMask);
+
+            return onGround && IsUprightEnough(groundHit) && (!touchingObstacle || IsUprightEnough(obstacleHit));
+        }
+
+        private bool IsUprightEnough(RaycastHit hitInfo)
+        {
+            if (hitInfo.collider == null) return false; 
+
+            var angleToSurface = Vector3.Angle(Vector3.up, hitInfo.normal);
+            return angleToSurface <= maxSlopeAngle;
+        }
+
+        private void MoveToHitPoint(RaycastHit hitInfo)
+        {
+            transform.position = hitInfo.point + groundOffset * hitInfo.normal;
+            transform.up = hitInfo.normal;
+        }
         #endregion
 
         #region Debug
