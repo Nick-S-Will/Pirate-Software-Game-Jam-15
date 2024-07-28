@@ -44,6 +44,15 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Change Perspective"",
+                    ""type"": ""Button"",
+                    ""id"": ""3a80b09a-ce80-4703-abff-024c0fd17c4c"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -95,61 +104,6 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""name"": ""right"",
                     ""id"": ""b6117746-6442-46f4-bd33-bc49a5706d01"",
                     ""path"": ""<Keyboard>/d"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""Arrows"",
-                    ""id"": ""32f488ea-6bd9-4d4f-b895-1fcb58e44a49"",
-                    ""path"": ""2DVector"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": true,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": ""up"",
-                    ""id"": ""b0a40801-58fc-4122-9da8-42da47afa4ab"",
-                    ""path"": ""<Keyboard>/upArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""down"",
-                    ""id"": ""3572b88d-b713-44c3-8415-a51ec86bb2a6"",
-                    ""path"": ""<Keyboard>/downArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""left"",
-                    ""id"": ""47b00213-6484-424c-811c-ea073ccea8f7"",
-                    ""path"": ""<Keyboard>/leftArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""right"",
-                    ""id"": ""0f6366f9-4395-48f4-bdbe-39c7a2e44328"",
-                    ""path"": ""<Keyboard>/rightArrow"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -214,8 +168,8 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""13fe6e68-4e3c-4e34-8a2c-5919fcfecaab"",
-                    ""path"": ""<Keyboard>/enter"",
+                    ""id"": ""384bb85e-b0c7-4122-b38f-9bd5c55e3c5e"",
+                    ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -244,6 +198,28 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Manipulate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f06fb086-5c53-4ea0-abbd-aec7ec18d99d"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Change Perspective"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""bb2bfbb0-46b9-48b4-a31c-1436628459f1"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Change Perspective"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -254,6 +230,7 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
         m_Shadow = asset.FindActionMap("Shadow", throwIfNotFound: true);
         m_Shadow_Move = m_Shadow.FindAction("Move", throwIfNotFound: true);
         m_Shadow_Manipulate = m_Shadow.FindAction("Manipulate", throwIfNotFound: true);
+        m_Shadow_ChangePerspective = m_Shadow.FindAction("Change Perspective", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -317,12 +294,14 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
     private List<IShadowActions> m_ShadowActionsCallbackInterfaces = new List<IShadowActions>();
     private readonly InputAction m_Shadow_Move;
     private readonly InputAction m_Shadow_Manipulate;
+    private readonly InputAction m_Shadow_ChangePerspective;
     public struct ShadowActions
     {
         private @ShadowInputs m_Wrapper;
         public ShadowActions(@ShadowInputs wrapper) { m_Wrapper = wrapper; }
         public InputAction @Move => m_Wrapper.m_Shadow_Move;
         public InputAction @Manipulate => m_Wrapper.m_Shadow_Manipulate;
+        public InputAction @ChangePerspective => m_Wrapper.m_Shadow_ChangePerspective;
         public InputActionMap Get() { return m_Wrapper.m_Shadow; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -338,6 +317,9 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
             @Manipulate.started += instance.OnManipulate;
             @Manipulate.performed += instance.OnManipulate;
             @Manipulate.canceled += instance.OnManipulate;
+            @ChangePerspective.started += instance.OnChangePerspective;
+            @ChangePerspective.performed += instance.OnChangePerspective;
+            @ChangePerspective.canceled += instance.OnChangePerspective;
         }
 
         private void UnregisterCallbacks(IShadowActions instance)
@@ -348,6 +330,9 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
             @Manipulate.started -= instance.OnManipulate;
             @Manipulate.performed -= instance.OnManipulate;
             @Manipulate.canceled -= instance.OnManipulate;
+            @ChangePerspective.started -= instance.OnChangePerspective;
+            @ChangePerspective.performed -= instance.OnChangePerspective;
+            @ChangePerspective.canceled -= instance.OnChangePerspective;
         }
 
         public void RemoveCallbacks(IShadowActions instance)
@@ -369,5 +354,6 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnManipulate(InputAction.CallbackContext context);
+        void OnChangePerspective(InputAction.CallbackContext context);
     }
 }
