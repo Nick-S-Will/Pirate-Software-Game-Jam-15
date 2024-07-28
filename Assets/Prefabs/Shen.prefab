@@ -48,8 +48,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 2
-  groundOffset: 0.005
-  maxGroundDistance: 0.05
+  groundOffset: 0.04
+  maxGroundDistance: 0.1
   maxSlopeAngle: 50
   obstacleMask:
     serializedVersion: 2
@@ -139,6 +139,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 2f81b82d-077b-4524-b707-f3945b9c433e
     m_ActionName: Shadow/Manipulate[/Keyboard/z]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3a80b09a-ce80-4703-abff-024c0fd17c4c
+    m_ActionName: Shadow/Change Perspective[/Keyboard/e]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Shadow
