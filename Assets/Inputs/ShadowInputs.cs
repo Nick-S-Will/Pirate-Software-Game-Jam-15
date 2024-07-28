@@ -53,6 +53,15 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""85dfd35a-8a50-4993-bcb3-f506155ee3fa"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -220,6 +229,28 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
                     ""action"": ""Change Perspective"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1e149725-8199-459f-b791-8eb6214b8024"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d68ae043-2663-457e-b435-27c72bde70e9"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -231,6 +262,7 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
         m_Shadow_Move = m_Shadow.FindAction("Move", throwIfNotFound: true);
         m_Shadow_Manipulate = m_Shadow.FindAction("Manipulate", throwIfNotFound: true);
         m_Shadow_ChangePerspective = m_Shadow.FindAction("Change Perspective", throwIfNotFound: true);
+        m_Shadow_Pause = m_Shadow.FindAction("Pause", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -295,6 +327,7 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_Shadow_Move;
     private readonly InputAction m_Shadow_Manipulate;
     private readonly InputAction m_Shadow_ChangePerspective;
+    private readonly InputAction m_Shadow_Pause;
     public struct ShadowActions
     {
         private @ShadowInputs m_Wrapper;
@@ -302,6 +335,7 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Shadow_Move;
         public InputAction @Manipulate => m_Wrapper.m_Shadow_Manipulate;
         public InputAction @ChangePerspective => m_Wrapper.m_Shadow_ChangePerspective;
+        public InputAction @Pause => m_Wrapper.m_Shadow_Pause;
         public InputActionMap Get() { return m_Wrapper.m_Shadow; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -320,6 +354,9 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
             @ChangePerspective.started += instance.OnChangePerspective;
             @ChangePerspective.performed += instance.OnChangePerspective;
             @ChangePerspective.canceled += instance.OnChangePerspective;
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
         }
 
         private void UnregisterCallbacks(IShadowActions instance)
@@ -333,6 +370,9 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
             @ChangePerspective.started -= instance.OnChangePerspective;
             @ChangePerspective.performed -= instance.OnChangePerspective;
             @ChangePerspective.canceled -= instance.OnChangePerspective;
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
         }
 
         public void RemoveCallbacks(IShadowActions instance)
@@ -355,5 +395,6 @@ public partial class @ShadowInputs: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnManipulate(InputAction.CallbackContext context);
         void OnChangePerspective(InputAction.CallbackContext context);
+        void OnPause(InputAction.CallbackContext context);
     }
 }
