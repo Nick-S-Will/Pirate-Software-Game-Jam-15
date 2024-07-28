@@ -25,7 +25,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Dark_Metallic
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_Parent: {fileID: 2100000, guid: 5a4669970e6abed459c369fdb2234c8b, type: 2}
+  m_Parent: {fileID: 2100000, guid: 605b7859b0cd6cd4fa17faf072460aba, type: 2}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
