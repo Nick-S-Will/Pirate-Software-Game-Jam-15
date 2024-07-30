@@ -704,7 +704,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 93459c4cd500dfe478e31402207b95a1, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -6928,6 +6928,10 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 1874060}
+    - target: {fileID: 781456944805522407, guid: 87ff812abfdfc854c8eb40e739bc435e, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1428084037281786713, guid: 87ff812abfdfc854c8eb40e739bc435e, type: 3}
       propertyPath: m_Name
       value: Cameras
@@ -7044,7 +7048,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 625688988}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdd21106b5422ba45ac1e09350a91754, type: 3}
   m_Name: 
@@ -10263,7 +10267,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 0823506e80baaeb45b63f0da80f4342b, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -10391,7 +10395,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 9c2ec28565c5dec459195ddf6abafde2, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -16800,7 +16804,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fadeImage: {fileID: 1966674412}
-  fadeTime: 1
+  fadeTime: 2.5
   waitTime: 4
   basementCircuitEndingAudio: {fileID: 28069872}
   allCircuitEndingAudio: {fileID: 1007012821}
