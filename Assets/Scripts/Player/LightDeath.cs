@@ -1,5 +1,9 @@
 using UnityEngine;
 
+//added by Audrey for sfx: 
+using UnityEngine.Events;
+
+
 namespace ShadowAlchemy.Player
 {
     public class LightDeath : MonoBehaviour
@@ -7,6 +11,8 @@ namespace ShadowAlchemy.Player
         [SerializeField] private ShadowTraversal player;
         [Tooltip("Optional reset transform. Will use " + nameof(player) + "'s position and rotation at " + nameof(Start) + "() otherwise")]
         [SerializeField] private Transform startTransform;
+
+        public UnityEvent lightDeath;
 
         private Vector3 startPosition;
         private Quaternion startRotation;
@@ -29,6 +35,9 @@ namespace ShadowAlchemy.Player
             var position = startTransform ? startTransform.position : startPosition;
             var rotation = startTransform ? startTransform.rotation : startRotation;
             player.transform.SetLocalPositionAndRotation(position, rotation);
+
+            lightDeath.Invoke();
+
         }
     }
 }
