@@ -2519,7 +2519,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: Nicholas (nick-will.itch.io) - Programming (Player Movement, Object Manipulation,
-    Camera), Puzzle Design
+    Camera), Puzzle Design, Music
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6508,7 +6508,7 @@ MonoBehaviour:
   m_text: 'Made for Pirate Software Game Jam 15 (July 2024)
 
     Sound Effects from
-    Pixabay
+    Pixabay and Freesound.org
 
     Models from Eldamar Studio Asset Pack'
   m_isRightToLeft: 0
