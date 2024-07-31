@@ -211,11 +211,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49d016450da04462fa75d31d81c75144, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shen: {fileID: 0}
-  movingAudioSourceGO: {fileID: 0}
-  manipulationAudioSource: {fileID: 0}
-  deathAudioSource: {fileID: 0}
-  shenRef: {fileID: 0}
+  shen: {fileID: 519758670183088772}
+  movingAudioSourceGO: {fileID: 6037662551823586919}
+  manipulationAudioSource: {fileID: 3750045210165362262}
+  deathAudioSource: {fileID: 3750045210165362262}
+  shenRef: {fileID: 4310035338501690066}
   viewableMoveInput: {x: 0, y: 0}
 --- !u!1 &1453559498597284491
 GameObject:
