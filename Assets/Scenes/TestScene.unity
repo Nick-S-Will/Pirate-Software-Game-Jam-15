@@ -128,8 +128,12 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1258990730}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1439604203021887103, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1889487104303909008, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_Name
       value: NpcShade (1)
@@ -170,21 +174,25 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 49.28602
       objectReference: {fileID: 0}
+    - target: {fileID: 4407430882253106164, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
+      propertyPath: shen
+      value: 
+      objectReference: {fileID: 1110493541}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 1.327
       objectReference: {fileID: 0}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 1.327
       objectReference: {fileID: 0}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 1.327
       objectReference: {fileID: 0}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.8831951
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalPosition.y
@@ -192,7 +200,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.4672192
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1143,11 +1151,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1228297147}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &1258990730 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
-  m_PrefabInstance: {fileID: 7993628181490798225}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1277559834
 GameObject:
   m_ObjectHideFlags: 0
@@ -1388,11 +1391,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1301444913}
   m_CullTransparentMesh: 1
---- !u!4 &1428484376 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
-  m_PrefabInstance: {fileID: 36062179}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1608696089
 GameObject:
   m_ObjectHideFlags: 0
@@ -2118,6 +2116,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1439604203021887103, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 1889487104303909008, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
       propertyPath: m_Name
       value: NpcShade
@@ -2172,10 +2174,7 @@ PrefabInstance:
       objectReference: {fileID: 963194227}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 4421940405801245026, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1428484376}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 23138e36d22b4459c89ea2909a186f97, type: 3}
 --- !u!1660057539 &9223372036854775807
@@ -2188,4 +2187,5 @@ SceneRoots:
   - {fileID: 1743217521}
   - {fileID: 762593844}
   - {fileID: 7993628181490798225}
+  - {fileID: 36062179}
   - {fileID: 856110096}
