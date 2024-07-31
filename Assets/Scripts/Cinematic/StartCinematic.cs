@@ -28,6 +28,8 @@ namespace ShadowAlchemy.Cinematic
 
         private IEnumerator CinematicRoutine()
         {
+            OnStartCinematic.Invoke();
+
             startLight.enabled = true;
             startAudio.Play();
 
